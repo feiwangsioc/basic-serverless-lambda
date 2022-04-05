@@ -9,11 +9,32 @@ provider:
 custom:
   fileUploadBucketName: ${self:service}-bucket-${self:provider.stage}
 
+plugins:
+  - serverless-iam-roles-per-function
+
 functions:
   hello:
     handler: src/handler.generateRandomNumber
     timeout: 60 # seconds
     memorySize: 128 # mb
+
+  s3FileUploader:
+    handler: src/upload.hander
+    name: s3-file-uploader
+    description: A lambda handler S3 and api gateway
+    timeout: 60 # seconds
+    memorySize: 128 # mb
+    events:
+      - http:
+          path: images
+          method: post
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "s3:*"
+        Resource: arn:aws:s3:::${self:custom.fileUploadBucketName}/*
+    environment:
+      FILE_UPLOAD_BUCKET_NAME: ${self:custom.fileUploadBucketName}
 
 
 resources:
