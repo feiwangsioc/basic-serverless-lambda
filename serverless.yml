@@ -6,8 +6,20 @@ provider:
   stage: dev
   region: us-east-1
 
+custom:
+  fileUploadBucketName: ${self:service}-bucket-${self:provider.stage}
+
 functions:
   hello:
     handler: src/handler.generateRandomNumber
     timeout: 60 # seconds
     memorySize: 128 # mb
+
+
+resources:
+  Resources:
+    FileBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.fileUploadBucketName}
+        AccessControl: PublicRead
